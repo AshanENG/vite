@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiGet, API } from "../api.js";
 import { motion, AnimatePresence } from "framer-motion";
 import InterestsDialog from "../components/InterestsDialog.jsx";
 
@@ -19,7 +20,7 @@ const EventsScreen = () => {
   const [isEditInterestsOpen, setIsEditInterestsOpen] = useState(false);
 
   const navigate = useNavigate();
-  const API_BASE_URL = "http://localhost:3036";
+  const API_BASE_URL = API; // use shared API constant; apiGet handles fallback
 
   // 🟢 Helper function for status
   const getEventStatus = (start, end) => {
@@ -74,12 +75,8 @@ const EventsScreen = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/events`, {
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to fetch events");
-      const data = await response.json();
-      setEvents(data || []);
+      const data = await apiGet('/api/events');
+      setEvents(Array.isArray(data) ? data : []);
 
       // Load interested status
       if (Array.isArray(data) && data.length) {
